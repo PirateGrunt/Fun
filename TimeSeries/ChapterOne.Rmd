@@ -1,0 +1,81 @@
+---
+title: "Chapter 1"
+author: "Brian A. Fannin"
+output: html_document
+---
+
+Notes and scribbles while reading Introductory Time Series with R by Cowpertwait and Metcalfe.
+
+We start by learning a bit about the `ts` object in R and also about the basics of time series. A time series is an ordered sequence of values. The `ts` object will store metadata about the `start` and `end` times, as well as the `frequency` of observations.
+
+`ts` is an S3 object, with 20 generic functions implemented. Weirdly, it has no names. Using `as.list` will simply return a list whose elements match a vector of the observations.
+
+```{r }
+data(AirPassengers)
+AP <- AirPassengers
+
+class(AP)
+
+start(AP)
+end(AP)
+frequency(AP)
+
+methods(class = 'ts')
+
+names(AP)
+
+mojo <- as.list(AP)
+
+str(AP)
+plot(AP)
+
+plot(aggregate(AP))
+```
+
+`cycle` and `frequency` are two fairly relevant bits of metadata. For our first sample data, we know that the frequency is 12, which means 12 observations per cycle.
+
+```{r }
+cycle(AP)
+
+boxplot(AP ~ cycle(AP))
+```
+
+Because the frequency of this time series is set to be 12, we can use the `cycle` function to produce that nice boxplot.
+
+Can we change the frequency? Let's try.
+
+
+```{r error=TRUE}
+mojo <- AP
+cycle(mojo) <- 4
+frequency(mojo) <- 4
+```
+
+Hmm, that doesn't do it. Looks as though we have to set that at construction. Before we do, though, let's have a look at their construction example.
+
+```{r error=TRUE}
+URL <- "http://www.massey.ac.nz/~pscowper/ts/Maine.dat"
+Maine.month <- read.table(URL, header=TRUE)
+```
+
+Data isn't available. Bummer. I even went to the university website and nothing doing. Grr.
+
+OK, the important thing is that `frequency` is used to subdivide an interval into smaller increments which (probably?) relate to one another and form seasonal patterns. Probably.
+
+Let's have another look at `aggregate` as that's how C&M convert a monthly time series into an annual one.
+OK, having done that, I don't think that's the way to go. `aggregate` adds successive values together like `cumsum`, but the difference is that it pays attention to the `frequency`. When we aggregate the airline passenger data, it will collapse everything to one year. If we truly want quarterly data, we have to approach this differently.
+
+```{r }
+aggAP <- aggregate(AP)
+class(aggAP)
+
+length(aggAP)
+length(AP)
+
+(length(AP) / frequency(AP)) == length(aggAP)
+```
+
+
+There may be a `ts` way to do this, but I'm going to cheat and explore how to do that using `dplyr` or some such thing.
+
+Tomorrow.
