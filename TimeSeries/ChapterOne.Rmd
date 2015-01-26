@@ -13,6 +13,7 @@ We start by learning a bit about the `ts` object in R and also about the basics 
 ```{r }
 data(AirPassengers)
 AP <- AirPassengers
+rm(AirPassengers)
 
 class(AP)
 
@@ -75,7 +76,24 @@ length(AP)
 (length(AP) / frequency(AP)) == length(aggAP)
 ```
 
-
 There may be a `ts` way to do this, but I'm going to cheat and explore how to do that using `dplyr` or some such thing.
 
 Tomorrow.
+
+Note: altering a set of monthly figures to quarterly values means a few things. 1. The quarters may cross a calendar year. A rational quarter for "winter" would likely begin in December and end with February. This would mean summer is June, July and August, which makes sense. However, now quarters aren't assigned to proper years. Confusing. 2. If I'm not mistaken, we must collapse the months into a single observation. Either `sum` or `mean` would work. But I don't think we get the idea of three random observations from one quarter. I may have this all backwards, but I think there's some loss of information on the variability of the phenomena.
+
+Back to chapter one. We've plotted, correlated and taken a window of observations. It's late and I'm not going to repeat that stuff. Something more profound happens on page 19. We decompose a time series and get an equation. That equation is number 1.2
+
+$$ x_t = m_t + s_t + z_t$$
+
+We know that $z$ will be stochastic. The parameters $m$ and $s$ look like deterministic parameters which we will estimate, though they vary at each point in time. We estimate m- the 'trend' by taking averages of the $x$'s around $x_t$. The seasonal parameter at time $t$ is then the difference between $x$ and $m$.
+
+```{r }
+decompAP <- decompose(AP)
+class(decompAP)
+plot(decompAP)
+
+plot(stl(AP, "periodic"))
+```
+
+OK, so that's fairly cool. But how does this help me make forecasts and how do I assess the quality of my model? I might find that out in Chapter 2.
